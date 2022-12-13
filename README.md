@@ -6,7 +6,8 @@ Web Server with Flask
 
 - [X] Make the basic frame.
 - [X] Implement the **CRUD** system.
-- [ ] Packaging the app.
+- [X] Package the app.
+- [ ] Test the app
 - [ ] Deploy the app.
 
 ---
