@@ -35,13 +35,16 @@ $ open htmlcov/index.html
 
 ```
 $ venv/bin/flask --app flaskr --debug run
-# connect the http://127.0.0.1:5000 via browser
+$ open http://127.0.0.1:5000
+# check the browser opened!
 ```
 
 ### Production
 
 ```
 $ waitress-serve --call 'flaskr:create_app'
+$ open http://0.0.0.0:8080
+# check the browser opened!
 ```
 
 ---
