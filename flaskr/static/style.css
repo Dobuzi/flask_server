@@ -133,3 +133,12 @@ input[type=submit] {
 	align-self: start;
 	min-width: 10em;
 }
+
+input.like_button {
+	font-size: 1em;
+	border: none;
+	background: #fff;
+	display: block;
+	padding: 0.5rem;
+	cursor: pointer;
+}
