@@ -91,9 +91,10 @@ nav ul li a, nav li span, header .action {
 	margin-bottom: 0;
 }
 
-.post .about {
+.post .about, .content .about {
 	color: slategray;
 	font-style: italic;
+	font-size: 0.85rem;
 }
 
 .post .body {
