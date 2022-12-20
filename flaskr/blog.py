@@ -99,19 +99,26 @@ def delete(id):
 @bp.route('/<int:id>/like', methods=('GET', 'POST'))
 @login_required
 def like(id):
-	post = get_post(id)
-	
 	if request.method == 'POST':
 		db = get_db()
-		click_like(db, post)
+		click_dislike(db, id) if already_like(db, id) else click_like(db, id)
 		update_likes(db, id)
 	return redirect(url_for('blog.index'))
 
-def click_like(db, post):
+def click_like(db, id):
 	db.execute(
 		'INSERT INTO like (user_id, post_id)'
 		' VALUES (?, ?)',
-		(g.user['id'], post['id'])
+		(g.user['id'], id)
+	)
+	db.commit()
+	return
+
+def click_dislike(db, id):
+	db.execute(
+		'DELETE FROM like'
+		' WHERE user_id = ? AND post_id = ?',
+		(g.user['id'], id)
 	)
 	db.commit()
 	return
@@ -122,6 +129,14 @@ def count_likes(db, id):
 		(id,)
 	).fetchone()
 	return c['cnt']
+
+def already_like(db, id):
+	c = db.execute(
+		'SELECT COUNT(*) as cnt FROM like'
+		' WHERE user_id = ? AND post_id = ?',
+		(g.user['id'], id)
+	).fetchone()
+	return True if c['cnt'] > 0 else False
 
 def update_likes(db, id):
 	db.execute(
