@@ -131,14 +131,20 @@ input.danger {
 
 input[type=submit] {
 	align-self: start;
-	min-width: 10em;
+	min-width: 5em;
 }
 
-input.like_button {
+input.like_button, input.liked_button {
 	font-size: 1em;
 	border: none;
+	border-radius: 5em;
 	background: #fff;
 	display: block;
 	padding: 0.5rem;
 	cursor: pointer;
+}
+
+input.liked_button {
+	background: linear-gradient(45deg, darkturquoise 0%, skyblue 50%, white 100%);
+	box-shadow: 0.1em 0.1em aliceblue;
 }

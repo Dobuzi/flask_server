@@ -20,7 +20,7 @@
 						<a class="action" href="{{ url_for('blog.update', id=post['id']) }}">Edit</a>
 					{% endif %}
 					<form action="{{ url_for('blog.like', id=post['id']) }}" method="post">
-						<input class="like_button" type="submit" value="👍 {{ post['likes'] }}">
+						<input class="{{ 'liked_button' if already_like(post['id']) else 'like_button' }}" type="submit" value="👍 {{ post['likes'] }}">
 					</form>
 				</div>
 			</header>

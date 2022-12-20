@@ -54,7 +54,7 @@ def get_post(id, check_author=True):
 
 	if post is None:
 		abort(404, f'Post id {id} doesn\'t exist.')
-	
+
 	if check_author and post['author_id'] != g.user['id']:
 		abort(403)
 	
@@ -101,9 +101,9 @@ def delete(id):
 def like(id):
 	if request.method == 'POST':
 		db = get_db()
-		click_dislike(db, id) if already_like(db, id) else click_like(db, id)
+		click_dislike(db, id) if already_like(id) else click_like(db, id)
 		update_likes(db, id)
-	return redirect(url_for('blog.index'))
+	return redirect(url_for('blog.detail', id=id)) if request.args.get('is_detail', 'False') == 'True' else redirect(url_for('blog.index'))
 
 def click_like(db, id):
 	db.execute(
@@ -130,13 +130,20 @@ def count_likes(db, id):
 	).fetchone()
 	return c['cnt']
 
-def already_like(db, id):
+def already_like(id):
+	if g.user is None:
+		return False
+	db = get_db()
 	c = db.execute(
 		'SELECT COUNT(*) as cnt FROM like'
 		' WHERE user_id = ? AND post_id = ?',
 		(g.user['id'], id)
 	).fetchone()
 	return True if c['cnt'] > 0 else False
+
+@bp.context_processor
+def utility_processor():
+	return dict(already_like=already_like)
 
 def update_likes(db, id):
 	db.execute(
@@ -148,5 +155,5 @@ def update_likes(db, id):
 
 @bp.route('/<int:id>/detail')
 def detail(id):
-	post = get_post(id)
+	post = get_post(id, check_author=False)
 	return render_template('blog/detail.html', post=post)

@@ -52,7 +52,7 @@ $ open http://0.0.0.0:8080
 ## To Do List
 
 - [X] Detail View: Enter by clicking the post title
-- [ ] Like/Unlike a post
+- [X] Like/Unlike a post
 - [ ] Comments
 - [ ] Tags: Clicking a tag shows all the posts with that tag
 - [ ] Search box : Filtering the index page by name
