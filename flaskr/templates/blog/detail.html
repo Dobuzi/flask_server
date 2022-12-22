@@ -14,5 +14,30 @@
 {% block content %}
 	<article class="post">
 		<p class="body">{{ post['body'] }}</p>
+		<hr>
+		<div class="comments">
+			<h2>Comments</h2>
+			<form action="{{ url_for('blog.comment', id=post['id']) }}" method="post">
+				<textarea name="body" id="body" required>{{ request.form['body'] }}</textarea>
+				<input type="submit" value="Save">
+			</form>
+			{% for comment in comments %}
+			<article class="comment">
+				<p class="body">{{ comment['body'] }}</p>
+				<form action="{{ url_for('blog.like_comment', id=comment['id'], post_id=post['id']) }}" method="post">
+					<input class="{{ 'liked_button' if already_like(comment['id'], is_post=False) else 'like_button' }}" type="submit" value="👍 {{ comment['likes'] }}">
+				</form>
+				<div class="about">by {{ comment['username'] }}<br>on {{ comment['created'].strftime('%Y-%m-%d') }}</div>
+				{% if g.user['id'] == post['author_id'] %}
+					<form action="{{ url_for('blog.delete', id=comment['id'], is_post=False, post_id=post['id']) }}" method="post">
+						<input class="danger" type="submit" value="Delete" onclick="return confirm('Are you sure?');">
+					</form>
+				{% endif %}
+			</article>
+			{% if not loop.last %}
+				<hr>
+			{% endif %}
+			{% endfor %}
+		</div>
 	</article>
 {% endblock %}

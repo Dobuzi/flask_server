@@ -91,6 +91,10 @@ nav ul li a, nav li span, header .action {
 	margin-bottom: 0;
 }
 
+.post > .comments h2 {
+	font-size: 1.0em;
+}
+
 .post .about, .content .about {
 	color: slategray;
 	font-style: italic;
@@ -99,6 +103,10 @@ nav ul li a, nav li span, header .action {
 
 .post .body {
 	white-space: pre-line;
+}
+
+.post > .body {
+	min-height: 12em;
 }
 
 .content:last-child {
@@ -120,7 +128,7 @@ nav ul li a, nav li span, header .action {
 	margin-bottom: 1em;
 }
 
-.content textarea {
+.content > textarea {
 	min-height: 12em;
 	resize: vertical;
 }
