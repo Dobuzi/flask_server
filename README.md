@@ -53,7 +53,7 @@ $ open http://0.0.0.0:8080
 
 - [X] Detail View: Enter by clicking the post title
 - [X] Like/Unlike a post
-- [ ] Comments
+- [X] Comments
 - [ ] Tags: Clicking a tag shows all the posts with that tag
 - [ ] Search box : Filtering the index page by name
 - [ ] Paged display. Only show 5 posts per page
