@@ -2,8 +2,6 @@ from flask import (
 	Blueprint, flash, g, redirect, render_template, request, url_for
 )
 
-from werkzeug.exceptions import abort
-
 from flaskr.auth import login_required
 from flaskr.db import get_db
 from flaskr.utils import *
@@ -13,19 +11,17 @@ bp = Blueprint('blog', __name__)
 @bp.route('/')
 def index():
 	db = get_db()
-	posts = db.execute(
-		'SELECT p.id, title, body, created, author_id, username, likes'
-		' FROM post p JOIN user u ON p.author_id = u.id'
-		' ORDER BY created DESC'
-	).fetchall()
+	posts = get_posts(db)
 	return render_template('blog/index.html', posts=posts)
 
 @bp.route('/create', methods=('GET', 'POST'))
 @login_required
 def create():
 	if request.method == 'POST':
+		post_id = get_id()
 		title = request.form['title']
 		body = request.form['body']
+		tags = parse_tags(body)
 		error = None
 
 		if not title:
@@ -35,23 +31,22 @@ def create():
 			flash(error)
 		else:
 			db = get_db()
-			db.execute(
-				'INSERT INTO post (title, body, author_id)'
-				' VALUES (?, ?, ?)',
-				(title, body, g.user['id'])
-			)
+			create_post(db, post_id, title, body)
+
+			for tag_body in tags:
+				add_tag(db, post_id, tag_body)
+
 			db.commit()
 			return redirect(url_for('blog.index'))
 	return render_template('blog/create.html')
 
-@bp.route('/<int:id>/update', methods=('GET', 'POST'))
+@bp.route('/<string:id>/update', methods=('GET', 'POST'))
 @login_required
 def update(id):
-	post = get_post(id)
-
 	if request.method == 'POST':
 		title = request.form['title']
 		body = request.form['body']
+		tags = parse_tags(body)
 		error = None
 
 		if not title:
@@ -61,16 +56,20 @@ def update(id):
 			flash(error)
 		else:
 			db = get_db()
-			db.execute(
-				'UPDATE post SET title = ?, body = ?'
-				' WHERE id = ?',
-				(title, body, id)
-			)
+			update_post(db, title, body, id)
+
+			delete_tag(db, id)
+
+			for tag_body in tags:
+				add_tag(db, id, tag_body)
+				
 			db.commit()
 			return redirect(url_for('blog.index'))
+
+	post = get_post(id)
 	return render_template('blog/update.html', post=post)
 
-@bp.route('/<int:id>/delete', methods=('POST',))
+@bp.route('/<string:id>/delete', methods=('POST',))
 @login_required
 def delete(id):
 	which_val = ('post', 'like', 'post_id') if request.args.get('is_post', 'False') == 'True' else ('comment', 'like_comment', 'comment_id')
@@ -81,7 +80,7 @@ def delete(id):
 	db.commit()
 	return redirect(url_for('blog.detail', id=post_id)) if post_id else redirect(url_for('blog.index'))
 
-@bp.route('/<int:id>/like', methods=('GET', 'POST'))
+@bp.route('/<string:id>/like', methods=('GET', 'POST'))
 @login_required
 def like(id):
 	if request.method == 'POST':
@@ -90,7 +89,7 @@ def like(id):
 		update_likes(db, id)
 	return redirect(url_for('blog.detail', id=id)) if request.args.get('is_detail', 'False') == 'True' else redirect(url_for('blog.index'))
 
-@bp.route('/<int:id>/like_comment', methods=('GET', 'POST'))
+@bp.route('/<string:id>/like_comment', methods=('GET', 'POST'))
 @login_required
 def like_comment(id):
 	post_id = request.args.get('post_id', None)
@@ -100,20 +99,22 @@ def like_comment(id):
 		update_likes(db, id, is_post=False)
 	return redirect(url_for('blog.detail', id=post_id))
 
-@bp.route('/<int:id>/detail')
+@bp.route('/<string:id>/detail')
 def detail(id):
 	post = get_post(id, check_author=False)
 	comments = get_comments(id)
-	return render_template('blog/detail.html', post=post, comments=comments)
+	tags = get_tags(id)
+	return render_template('blog/detail.html', post=post, comments=comments, tags=tags)
 
 @bp.context_processor
 def utility_processor():
 	return dict(already_like=already_like)
 
-@bp.route('/<int:id>/comment', methods=('GET', 'POST'))
+@bp.route('/<string:id>/comment', methods=('GET', 'POST'))
 @login_required
 def comment(id):
 	if request.method == 'POST':
+		comment_id = get_id()
 		body = request.form['body']
 		error = None
 		
@@ -124,10 +125,6 @@ def comment(id):
 			flash(error)
 		else:
 			db = get_db()
-			db.execute(
-				'INSERT INTO comment (post_id, author_id, body)'
-				' VALUES (?, ?, ?)',
-				(id, g.user['id'], body)
-			)
+			add_comment(db, comment_id, id, body)
 			db.commit()
 	return redirect(url_for('blog.detail', id=id))
